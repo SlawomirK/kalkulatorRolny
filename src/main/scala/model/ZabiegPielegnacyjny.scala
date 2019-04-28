@@ -1,3 +1,5 @@
+package model
+
 import java.time.LocalDate
 
 /**
@@ -9,17 +11,15 @@ import java.time.LocalDate
 case class ZabiegPielegnacyjny(
                                 /** Atrybut zlozony. */
                                 dataWykonaniaZabiegu: LocalDate,
-
-                                /** AsocjacjaDoZabiegu. */
+                                powodZabiegu: Enumy.ZabiegiNaRosliny,
                                 wykonujacyZabieg: WykonujacyZabieg,
-
-                                /** ---------------------------------------------------------. */
-                                dzialkaRolna: DzialkaRolna) extends ObjectPlusPlus {
-  def getDataZabiegu = dataWykonaniaZabiegu
+                                // konkretnyZabieg: DzialkaRolna_Zabieg//dowiazanie do asocjacji z atrybutem
+                              ) extends ObjectPlusPlus {
+  //def getDataZabiegu = dataWykonaniaZabiegu
 
   def getWykonujacyZabieg = wykonujacyZabieg
 
-  def getDzialkaRolna = dzialkaRolna
+  //def getDzialkaRolnaZabieg = konkretnyZabieg
 }
 
 /** ==========================. */
@@ -37,13 +37,13 @@ case class Osoba(
 }
 
 class WykonujacyZabieg(
-                        imie: String,
-                        nazwisko: String,
+                             imie: String,
+                             nazwisko: String,
 
-                        /** AsocjacjaDoZabiegu. */
-                        zabiegWykonany: ZabiegPielegnacyjny,
-                        adres: AdresZamieszkania,
-                        uprawnieniaChemizacyjne: LocalDate) extends Osoba(imie, nazwisko, adres) {
+                             /** AsocjacjaDoZabiegu. */
+                             zabiegWykonany: ZabiegPielegnacyjny,
+                             adres: AdresZamieszkania,
+                             uprawnieniaChemizacyjne: LocalDate) extends Osoba(imie, nazwisko, adres) {
   def this(imie: String, nazwisko: String, zabiegWykonany: ZabiegPielegnacyjny) = {
     this(imie, nazwisko, zabiegWykonany, null, null)
   }

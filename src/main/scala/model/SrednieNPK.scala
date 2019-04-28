@@ -1,4 +1,8 @@
+package model
+
 import java.util.Calendar
+
+import scala.collection.mutable
 
 object SrednieNPK {
 
@@ -18,7 +22,7 @@ object SrednieNPK {
   }
 }
 
-class SrednieNPK extends ObjectPlus {
+class SrednieNPK {
   private var czyMoznaStosowacN: Boolean = SrednieNPK.czyMogestosowacAzot //ATRYBUT WYLICZALNY odwalanie do klasowej metody
 
   //azotu nie moĹĽna stosowaÄ‡ od 1 grudnia do 1 marca
@@ -37,11 +41,9 @@ class SrednieNPK extends ObjectPlus {
   }
 
   /** -2- PRZECIAZENIE ta sama nazwa inny argument ile potrzeba jeszcze pod wszystkie uprawy w sumie. */
-  def ileNPKpotrzebuje(wszystkieDzialki: DzialkiEkstensje): (Int, Int, Int) = {
+  def ileNPKpotrzebuje(wszystkieDzialki: mutable.HashSet[Dzialka]): (Int, Int, Int) = {
     var wszystkieDzialkiRolneObsiane: Vector[DzialkaRolna] = {
-      for (
-        dzialka <- wszystkieDzialki.getWszystkieDzialki if (dzialka.isInstanceOf[DzialkaRolna])
-      ) yield dzialka.asInstanceOf[DzialkaRolna]
+      for (dzialka <- wszystkieDzialki.toVector if (dzialka.isInstanceOf[DzialkaRolna])) yield dzialka.asInstanceOf[DzialkaRolna]
     }
     val wynik: (Int, Int, Int) = {
       wszystkieDzialkiRolneObsiane = wszystkieDzialkiRolneObsiane.filter(_.getRoslina.getNazwa != "ugor")

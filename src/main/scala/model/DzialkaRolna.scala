@@ -1,4 +1,4 @@
-
+package model
 
 /**
   *
@@ -8,10 +8,12 @@
 class DzialkaRolna(
                     powierzchnia: Double,
                     oznaczenie: String,
-                    roslina: Roslina )
-  extends Dzialka(powierzchnia,
-    oznaczenie,
-    null) {
+                    roslina: Roslina) //--ascjacja1--1
+  extends Dzialka(powierzchnia, oznaczenie) {
+
+  //def this(powierzchnia:Double,oznaczenie:String,roslina: Roslina)=this(powierzchnia,oznaczenie,roslina,Option(dzialkaRolna_Zabieg))
+
+  roslina.dodajDzialke(this)
 
   //klucz oznaczenie,(dzialkaRolna,powierzchnia w ramach dzialki ewidencyjnej
   //ATRYBUT WIELOWARTOSCIOWY
@@ -30,17 +32,6 @@ class DzialkaRolna(
 
   def getPowierzchniaDzRolnej: Double = powierzchnia
 
-
-  def dodajDzialkeEwidencyjna(dzialkaEwidencyjna: DzialkaEwidencyjna, powierzchniaWGranicach: Double): Unit = {
-    require(!dzialkiWTejDzialce.contains(dzialkaEwidencyjna), "Ta dzialka Rolna juz jest wprowadzona")
-
-    if (powierzchniaWGranicach > dzialkaEwidencyjna.getPowierzchnia) throw new Exception("Czesc dzialki ewidencyjnej nie moze byc wieksza od calosci!")
-    else {
-      dzialkiWTejDzialce + (dzialkaEwidencyjna -> powierzchniaWGranicach)
-      dzialkaEwidencyjna.dodajDzialkeRolna(this, powierzchniaWGranicach)
-
-    }
-  }
 
   override def toString: String = super.toString + " " + roslina.toString + " dzialki ewidencyjne na tej dzialce rolnej " + wypiszDzialkiNaTejDzialce
 }
