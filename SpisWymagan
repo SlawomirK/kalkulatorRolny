@@ -1,0 +1,49 @@
+Wymagania na MAS
+==================
+
+Miniprojekt #1
+---------------------
+1. Ekstensje
+*objectPlus
+
+2. Ekstensje trwa³oœæ
+*ObjectPlus
+
+3. Atrybut z³o¿ony
+*Gospodarstwo->Adres
+*Dzia³kaRolna->Roslina
+
+4. Atrybut opcjonalny
+--przez wartoœæ domyœln¹ w *Dzialka->Gospodarstwo
+--przez sprawdzanie nula w *Dzialka->dzialkiWTejDzialce//+powtarzalny
+
+5. Atrybut powtarzalny
+--powtarzalny klasowy*Gospodarstwo->*object Gospodarstwo->dzialkiWGospodarstwie
+--powtarzalny *Dzialka->dzialkiWTejDzialce
+
+6. Atrybut klasowy
+*ŒrednieNPK->czyMogeStosowacAzot??wyliczalny
+*Gospodarstwo->*object Gospodarstwo->dzialkiWGospodarstwie//+powtarzalny
+*ObjectPlus->ekstensje//+powtarzalny
+
+7. Atrybut pochodny/wyliczalny
+*SrednieNPK->czyMogeStosowacAzot//+klasowy
+*Gospodarstwo->getPowierzchniaNieuzytkowanaRolniczo//+metoda klasowa
+
+8. Metoda klasowa
+*Gospodarstwo->getPowierzchniaNieuzytkowanaRolniczo
+*ObjectPlus->pokazEkstensje,zapiszEkstensje,wczytajEkstensje
+9. 	a) przes³oniêcie
+	--toString dowolnej klasie
+	
+	b) przeci¹¿enie	
+	*SrednieNPK->def ileNPKpotrzebuje(dzialkaRolna: DzialkaRolna): (Int, Int, Int)
+		->def ileNPKpotrzebuje(wszystkieDzialki: DzialkiEkstensje): (Int, Int, Int)
+
+Miniprojekt #2 Asocjacje
+---------------------
+ 1)Zwyk³a
+  DzialkaRolna(powirzchnia,oznaczenie,roslina:Roslina) 1-------* Roslina(nazwa,systematykaBotaniczna,Dzialka[...])
+ 2)Z atrybutem
+ 3)Kwalifikowana
+ 4)Kompozycja
