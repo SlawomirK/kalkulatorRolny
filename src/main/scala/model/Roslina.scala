@@ -1,38 +1,43 @@
 package model
 
-import scala.collection.mutable
+import model.Enumy.SystematykaBiologiczna
 
 
 /** ATRYBUT ZLOZONY jego atrybutami jest enum i String nazwa jest wymagana. */
-class Roslina(nazwa: String,
-              systematykaBotaniczna: Enumy.SystematykaUpraw,
-             ) //dzialki na ktorych jest roslina
-  extends ObjectPlus {
-  var dzialkiRolne = mutable.Set.empty[DzialkaRolna] //atrybut opjonalny
+class Roslina(_nazwa: String,
+              systematykaBotaniczna: Option[Enumy.SystematykaBiologiczna],
+              _czyOzime: Boolean) //dzialki na ktorych jest roslina
+  extends Organizm(_nazwa, systematykaBotaniczna) with ISamosiewy {
 
-  require((nazwa) != null, "Nie określono nazwy rośliny")
 
-  def dodajDzialke(dz: DzialkaRolna) = {
+  require((_nazwa) != null, "Nie określono nazwy rośliny")
 
-    if (!dzialkiRolne.contains(dz)) {
-       dzialkiRolne+= dz
-    }
-  }
+def zmienKlase(czyOzime:Boolean)={
+ new OrganizmSzkodliwy(this.nazwa,this.systematykaBiologiczna)
+}
 
   //w przypadku gdy drugi argument nie zostanie podany nastapi przeciazenie konstruktora
   // private val typRoslin = systematykaBotaniczna
-  def this() {
-    this(nazwa = "ugor", Enumy.chwasty)
-  }
 
-  def getNazwa: String = nazwa
+
+  override val nazwa: String = _nazwa
+  val czyOzime = _czyOzime
+
+
 
   override def toString: String = {
-    val tekst = "Na polu jest " + this.nazwa
+    val tekst = "Na polu jest " + this._nazwa
     systematykaBotaniczna match {
-      case Enumy.JEDNOLISCIENNE => tekst + " ktora nalezy do jednoliscienne"
-      case Enumy.DWULISCIENNE => tekst + " ktora nalezy do dwuliscienne"
-      case null => tekst + " i nic nie rosnie"
+      case Some(Enumy.jednoliscienne) => tekst + " ktora nalezy do jednoliscienne"
+      case Some(Enumy.dwuliscienne) => tekst + " ktora nalezy do dwuliscienne"
+      case Some(Enumy.wieloletnie)=>tekst+"która jest rośliną wieloletnią"
+      case None => tekst + " i nic nie rosnie"
+      case _ => " Nie rozpoznaje rodzaju tej rosliny"
     }
   }
+
+  //TODO:Metody do implementacji w pozniejszych wersjach
+  override def aktualneCenyRynkowe(roslinaNaSprzedaz: Roslina, wojewodztwo: String): Double = ???
+
+  override def szacunkowyDochodZaTajRosline(uzyskanyPlon_t: Double): Double = ???
 }

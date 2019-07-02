@@ -1,67 +1,133 @@
 package model
 
-import java.time.LocalDate
+import java.time.{LocalDate, Year}
 
 /**
-  * Asocjacja binarna. Dla uproszczenia dwie klasy w
-  * ejdnym pliku
-  * asocjacjaBinarna 1WykonujacyZabieg-1zabieg
+  * Dziedziczenie overlaping. ZabiegPielegnacyjny-----Naawozenie i Oprysk
+  * wykład. Wykład7 strona 26
   */
-
-case class ZabiegPielegnacyjny(
-                                /** Atrybut zlozony. */
-                                dataWykonaniaZabiegu: LocalDate,
-                                powodZabiegu: Enumy.ZabiegiNaRosliny,
-                                wykonujacyZabieg: WykonujacyZabieg,
-                                // konkretnyZabieg: DzialkaRolna_Zabieg//dowiazanie do asocjacji z atrybutem
-                              ) extends ObjectPlusPlus {
-  //def getDataZabiegu = dataWykonaniaZabiegu
-
-  def getWykonujacyZabieg = wykonujacyZabieg
-
-  //def getDzialkaRolnaZabieg = konkretnyZabieg
+object ZabiegPielegnacyjny {
+  private val nazwaRoliOprysk: String = "specjalizacjaOprysk"
+  private val nazwaRoliNawozenie: String = "specjalizacjaNawozenie"
 }
 
-/** ==========================. */
-case class Osoba(
-                  private val imie: String,
-                  private val nazwisko: String,
-                  private val adres: AdresZamieszkania) extends ObjectPlusPlus {
-  def getImie = imie
+class ZabiegPielegnacyjny(powierzchnia: Double,
+                          powodZabiegu: Enumy.powodZabiegu,
+                          wykonujacyZabieg: WykonujacyZabieg, //
+                          srodek: Srodek, //
+                          organizm: Organizm, //
+                          dzialkaRolna: DzialkaRolna,
+                          _dataZabiegu: LocalDate) extends ObjectPlusPlus {
+  private var _koszt = 0.0
+  //atrybuty dodane w wyniku implementacji dziedziczenia wieloaspektowego i przeniesieniu
+  //klas
+  //-------------------------------------------------------
+  private var _powodZabiegu = None: Option[Enumy.powodZabiegu]
+  private var _listaSzkodnikow = None: Option[Set[OrganizmSzkodliwy]]
+  private var _listaWarunkowDoPoprawy = None: Option[Set[String]]
 
-  def getNazwisko = nazwisko
+  //-------------------------------------------------------
+  this.dodajPowiazanie(srodek.getClass.getSimpleName, this.getClass.getSimpleName, srodek, srodek.nazwaSrodka)
+  this.dodajPowiazanie(organizm.getClass.getSimpleName, this.getClass.getSimpleName, organizm)
+  this.dodajPowiazanie(wykonujacyZabieg.getClass.getSimpleName, this.getClass.getSimpleName, wykonujacyZabieg)
+  new DzialkaRolna_Zabieg(_dataZabiegu, powierzchnia, dzialkaRolna, this)
 
-  def getAdres = adres
+  //-------------------------metody przeniesione z dziedziczenia wieloaspektowego
+  def usunSzkodnika(szk: OrganizmSzkodliwy) {
+    _listaSzkodnikow = _listaSzkodnikow match {
+      case Some(_listaSzkodnikow) => Option(_listaSzkodnikow.filterNot(s => s == szk))
+      case None => throw new Exception("Brak szkodnikow")
+    }
 
-  //---------------------------------------------------------------
-}
+    def powodZabiegu_=(x: Option[Enumy.powodZabiegu]) {
+      _powodZabiegu = x
+    }
 
-class WykonujacyZabieg(
-                             imie: String,
-                             nazwisko: String,
+    def listaSzkodnikow_=(x: Option[Enumy.powodZabiegu]) {
+      _powodZabiegu = x
+    }
 
-                             /** AsocjacjaDoZabiegu. */
-                             zabiegWykonany: ZabiegPielegnacyjny,
-                             adres: AdresZamieszkania,
-                             uprawnieniaChemizacyjne: LocalDate) extends Osoba(imie, nazwisko, adres) {
-  def this(imie: String, nazwisko: String, zabiegWykonany: ZabiegPielegnacyjny) = {
-    this(imie, nazwisko, zabiegWykonany, null, null)
+    def listaWarunkowDoPoprawy_=(x: Option[Set[String]]) {
+      _listaWarunkowDoPoprawy = x
+    }
+
+    val powodZabiegu = _powodZabiegu
+    val listaSzkodnikow = _listaSzkodnikow
+    val listaWarunkowDoPoprawy = _listaWarunkowDoPoprawy
   }
 
-  def getZabiegWykonany = zabiegWykonany
+  //------------------------------------------------------------------------------------
+
+  def dataZabiegu = _dataZabiegu
+
+  def koszt = _koszt
+
+  def koszt_=(k: Double) = {
+    require(k > 0, "Nalezy wpisac dodatnia wartosc")
+    _koszt += k
+  }
+
+  def dodajOprysk(substancjeBiologicznieCzynne: Set[String]) = {
+    val oprysk = new Oprysk(substancjeBiologicznieCzynne)
+    this.dodajPowiazanie(ZabiegPielegnacyjny.nazwaRoliOprysk, "generalizacja", oprysk)
+  }
+
+  //dodaje informacje o ilosci skladnikow pokarmowych i tworzy nowy obiekt Nawozenie
+  //(nazwa,procent)
+  def dodajNawozenie(skladnikiDodane: (String, Double)): Unit = {
+    val nawozenie = new Nawozenie(skladnikiDodane)
+    this.dodajPowiazanie(ZabiegPielegnacyjny.nazwaRoliNawozenie, "generalizacja", nawozenie)
+  }
+
+  def dajOpryskiPrzeprowadzoneWRoku(rok: Year): Array[ZabiegPielegnacyjny] = {
+    //daj zabiegi przeprowadzone w rok
+
+    try {
+      return this.dajPowiazania(ZabiegPielegnacyjny.nazwaRoliOprysk).
+        asInstanceOf[Array[ZabiegPielegnacyjny]].
+        filter(s => s.dataZabiegu.getYear == rok)
+    } catch {
+      case e: Exception => throw new Exception("Brak oprysku w zadanym roku!");
+    }
+  }
+
+  def dajZastosowaneDawkiPokarmoweNaDzialce(dzRolna: DzialkaRolna, rok: Year): Unit = {
+    try {
+      val d = this.dajPowiazania(ZabiegPielegnacyjny.nazwaRoliNawozenie).asInstanceOf[Array[ZabiegPielegnacyjny]].
+        filter(s => s.dataZabiegu.getYear == rok)
+      return d.filter(s=>s.dajPowiazanyObiekt(dzRolna.klasa.getSimpleName,dzRolna.getOznaczenie)==dzRolna)
+    } catch {
+      case e: Exception => throw new Exception("Brak nawozenia na dzialce " + dzRolna.getOznaczenie + " w roku " + rok)
+    }
+  }
+
 }
+  /*///zmiana konstruktora w zwiaz:ku z overlaping
+  case class Oprysk(
+                     powodZabiegu: Enumy.ZabiegiNaRosliny,
+                     wykonujacyZabieg: WykonujacyZabieg,
+                     preparat: Srodek,
+                     organizm:Organizm
+                   ) extends ZabiegPielegnacyjny(powodZabiegu, wykonujacyZabieg,preparat,organizm) {
 
-//--------------------------------------------
-case class AdresZamieszkania(
-                              miejscowosc: String,
-                              nrDomu: String,
-                              ulica: String) extends ObjectPlusPlus {
+  }*/
+  case class Oprysk(_sklad: Set[String]) extends ObjectPlusPlus {
+    val sklad = _sklad
+  }
 
-  def getMiescowosc = miejscowosc
+  /*
+  case class Nawozenie(
+                        powodZabiegu: Enumy.ZabiegiNaRosliny,
+                        wykonujacyZabieg: WykonujacyZabieg,
+                        nawoz:Srodek,
+                        organizm:Roslina
+                      ) extends ZabiegPielegnacyjny(powodZabiegu, wykonujacyZabieg,nawoz,organizm) {
 
-  def getnrDomu = nrDomu
+  }*/
+  case class Nawozenie(_sklad: (String, Double)) extends ObjectPlusPlus {
+    val sklad = _sklad
+  }
 
-  def getUlica = ulica
-}
 
-//----------------------------
+
+/** ==========================. */

@@ -7,7 +7,7 @@ abstract class Dzialka(
                         powierzchnia: Double,
                         oznaczenie: String,
                         gospodarstwo: Gospodarstwo = new Gospodarstwo(new Adres("domyslna Ulica", "domyslny NrDomu", "domyslna Miejscowosc"), 102))
-  extends ObjectPlus {
+  extends ObjectPlusPlus {
 
 
   protected var dzialkiWTejDzialce: HashMap[Dzialka, Double] = null
@@ -27,11 +27,16 @@ abstract class Dzialka(
     }
   }
 
-  def dodajDzialkiWchodzaceWSkladTejDzialki(dzialkaNaKtorejLezy: Dzialka,
+  def dodajDzialkiWchodzaceWSkladTejDzialki(dzialkaNaKtorejLezy:Dzialka,
                                             powierzchniaSkladowej: Double): Unit = {
-
-    // require(powierzchniaSkladowej < dzialkaNaKtorejLezy.getPowierzchnia,throw new Exception("Czesc dzialki ewidencyjnej nie moze byc wieksza od calosci!"))
-
+//    require(powierzchniaSkladowej < dzialkaNaKtorejLezy.getPowierzchnia, throw new Exception("Czesc dzialki ewidencyjnej nie moze byc wieksza od calosci!"))
+    //==========Wywolanie metody obslugujacej stworzenie asocjacji kwalifikowanej======
+    this.dodajPowiazanie(
+      dzialkaNaKtorejLezy.getClass.getSimpleName, //nazwa roli
+      this.getClass.getSimpleName, //odwrotna nazwa roli
+      dzialkaNaKtorejLezy, //obiekt docelowy
+      dzialkaNaKtorejLezy.getOznaczenie) //kwalifikator
+    //=================================================================================
     if (dzialkiWTejDzialce == null)
       dzialkiWTejDzialce = HashMap[Dzialka, Double]()
     else (!this.dzialkiWTejDzialce.contains(this))
@@ -40,8 +45,8 @@ abstract class Dzialka(
       dzialkaNaKtorejLezy.dodajDzialkiWchodzaceWSkladTejDzialki(this, powierzchniaSkladowej)
   }
 
-  def getDzialki: HashMap[Dzialka, Double] = {
-    dzialkiWTejDzialce
+  def getDzialki: Array[ObjectPlusPlus] = {
+    this.dajPowiazania(this.klasa.getSimpleName)
   }
 
   def wypiszDzialkiNaTejDzialce: String = {

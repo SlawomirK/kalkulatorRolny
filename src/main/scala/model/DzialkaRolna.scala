@@ -13,7 +13,7 @@ class DzialkaRolna(
 
   //def this(powierzchnia:Double,oznaczenie:String,roslina: Roslina)=this(powierzchnia,oznaczenie,roslina,Option(dzialkaRolna_Zabieg))
 
-  roslina.dodajDzialke(this)
+  roslina.dodajDzialkaNaKtorejWystepuje(this)
 
   //klucz oznaczenie,(dzialkaRolna,powierzchnia w ramach dzialki ewidencyjnej
   //ATRYBUT WIELOWARTOSCIOWY

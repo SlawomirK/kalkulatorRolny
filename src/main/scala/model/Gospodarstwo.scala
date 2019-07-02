@@ -3,9 +3,9 @@ package model
 import scala.collection.mutable
 
 case class Adres(
-                  private val ulica: String,
-                  private val nrDomu: String,
-                  private val miejscowosc: String) extends ObjectPlus
+                  ulica: String,
+                  nrDomu: String,
+                  miejscowosc: String) extends ObjectPlusPlus
 
 object Gospodarstwo {
   var dzialkiWGospodarstwie: mutable.HashSet[Dzialka] = mutable.HashSet[Dzialka]()
@@ -29,13 +29,16 @@ object Gospodarstwo {
 }
 
 class Gospodarstwo(
-                    private val adres: Adres,
-                    private val numerGospodarstwa: Int) extends ObjectPlus {
+                     adres: Adres,
+                     numerGospodarstwa: Int) extends ObjectPlusPlus() {
 
-  private var dzialki: Vector[_ <: Dzialka] = Vector()
 
+  private var dzialki = Vector[ Dzialka]()
+//TODO: przerobic to wykorzystujac danej z ObjectPlusPLus
   def dodajDzialke(dz: Dzialka) = {
     //metoda dodajaca czesc do calosi
+    this.dodajCzesc(dz.getClass.getSimpleName+"_czesc",this.getClass.getSimpleName+"_calosc",dz)
+
     if (!dzialki.contains(dz)) {
       if (Gospodarstwo.dzialkiWGospodarstwie.contains(dz)) throw new Exception("Ta dzialka juz jest powiazana z gospodarstwem")
       dzialki = dzialki :+ dz

@@ -1,6 +1,7 @@
 package model
 
 import java.io._
+import java.util
 
 import scala.collection.immutable.Vector
 import scala.collection.mutable.HashMap
@@ -9,15 +10,20 @@ import scala.io.Source
 /* Klasa uniwersalna zarzadzajaca ekstensajami oraz utrwalaniem-serializacja */
 object ObjectPlus {
 
-  var ekstensje = HashMap[Class[_ <: ObjectPlus], Vector[_ <: ObjectPlus]]()
+  private var ekstensje = new util.Hashtable[Class[_ <: ObjectPlus],util.Vector[ObjectPlus]]()
 
-
+def usunEkstensje(obiektDoUsuniecia:ObjectPlus)={
+  require(ekstensje.containsKey(obiektDoUsuniecia.klasa),throw new Exception("brak klasy obiektu do usuniecia"))
+  require(ekstensje.get(obiektDoUsuniecia.klasa).contains(obiektDoUsuniecia),throw new Exception("brak obiektu do usuniecia"))
+  ekstensje.get(obiektDoUsuniecia.klasa).remove(obiektDoUsuniecia)
+}
   def pokazEkstensje(klasa: Class[_ <: ObjectPlus]): Unit = {
-    var ekstensja: Vector[_ <: ObjectPlus] = null
+    var ekstensja:util.Vector[_ <: ObjectPlus]=null
 
-    if (ekstensje.contains(klasa)) {
+    if (ekstensje.containsKey(klasa)) {
       //ekstensja tej klasy istnieja w klekcji ekstensji
-      ekstensja = ekstensje(klasa)
+      import java.util
+      ekstensja = ekstensje.get(klasa).asInstanceOf[util.Vector[_ <: ObjectPlus]]
     } else
       throw new Exception("Nieznana klasa " + klasa)
 
@@ -46,7 +52,7 @@ object ObjectPlus {
     var in: ObjectInputStream = null
     try {
       in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(plikOdczytu)))
-      ekstensje = in.readObject().asInstanceOf[HashMap[Class[_ <: ObjectPlus], Vector[_ <: ObjectPlus]]]
+      ekstensje = in.readObject().asInstanceOf[util.Hashtable[Class[_ <: ObjectPlus],util.Vector[ObjectPlus]]]
 
       println("Wczytano dzialki bez bledu")
     } catch {
@@ -64,16 +70,19 @@ object ObjectPlus {
 class ObjectPlus extends Serializable {
 
   import ObjectPlus.ekstensje
+  var ekstensja:util.Vector[ObjectPlus]=null
 
-  var ekstensja: Vector[_ <: ObjectPlus] = null
   val klasa = this.getClass
 
-  if (ekstensje.contains(klasa)) {
-    ekstensja = ekstensje(klasa)
+  if (ekstensje.containsKey(klasa)) {
+    import java.util
+    ekstensja = ekstensje.get(klasa).asInstanceOf[util.Vector[ObjectPlus]]
+
   } else {
-    ekstensja = Vector[ObjectPlus]()
-    ekstensje += (klasa -> ekstensja)
+
+    ekstensja = new util.Vector[ ObjectPlus]()
+    ekstensje.put(klasa,ekstensja)
   }
   println("dodaje " + this)
-  ekstensja.:+(this)
+  ekstensja.add(this)
 }

@@ -23,14 +23,13 @@ object SrednieNPK {
 }
 
 class SrednieNPK {
-  private var czyMoznaStosowacN: Boolean = SrednieNPK.czyMogestosowacAzot //ATRYBUT WYLICZALNY odwalanie do klasowej metody
 
   //azotu nie moĹĽna stosowaÄ‡ od 1 grudnia do 1 marca
   //-1-PRZECIAZENIE ile trzeba dac na konkretna dzialke
   def ileNPKpotrzebuje(dzialkaRolna: DzialkaRolna): (Int, Int, Int) = {
 
     val danaDawkaNPK: (Int, Int, Int) = dzialkaRolna.getSypnieteNPK()
-    val wzorcowaDawkaNPK: (Int, Int, Int) = SrednieNPK.dawkiNPK(dzialkaRolna.getRoslina.getNazwa)
+    val wzorcowaDawkaNPK: (Int, Int, Int) = SrednieNPK.dawkiNPK(dzialkaRolna.getRoslina.nazwa)
     val powierzchnia = dzialkaRolna.getPowierzchniaDzRolnej
 
     val wy = Tuple3(
@@ -46,7 +45,7 @@ class SrednieNPK {
       for (dzialka <- wszystkieDzialki.toVector if (dzialka.isInstanceOf[DzialkaRolna])) yield dzialka.asInstanceOf[DzialkaRolna]
     }
     val wynik: (Int, Int, Int) = {
-      wszystkieDzialkiRolneObsiane = wszystkieDzialkiRolneObsiane.filter(_.getRoslina.getNazwa != "ugor")
+      wszystkieDzialkiRolneObsiane = wszystkieDzialkiRolneObsiane.filter(_.getRoslina.nazwa != "ugor")
 
       var n = 0
       var p = 0

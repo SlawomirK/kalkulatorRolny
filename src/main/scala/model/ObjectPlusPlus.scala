@@ -2,42 +2,35 @@ package model
 
 import java.io.PrintStream
 
-import scala.collection.JavaConverters._
-import scala.collection.mutable
-
+import java.util
 object ObjectPlusPlus {
   /** przechowuje informacje o wszystkich czesicach powiazanych z ktorymkolwiek z obiektow */
-  private val wszystkieCzesci: mutable.HashSet[ObjectPlusPlus] = mutable.HashSet()
+   private var wszystkieCzesci = new util.HashSet[ObjectPlusPlus]()
+
+  def usunCzesc(czescDoUsuniecia:ObjectPlusPlus)={
+    require(!wszystkieCzesci.isEmpty&&wszystkieCzesci.contains(czescDoUsuniecia),throw new Exception("Ten obiekt nie jest czescia "+this.getClass.getCanonicalName))
+    wszystkieCzesci.remove(czescDoUsuniecia)
+    ObjectPlus.usunEkstensje(czescDoUsuniecia)
+  }
+  def usunCalosc()={
+    this.wszystkieCzesci.stream().forEach(s=>ObjectPlusPlus.usunCzesc(s))
+  }
+  //this=CaloscDotychczasowa
+  def przekazCzescDoInnejCalosci(czescDoPrzekazania:ObjectPlusPlus,nowaCalosc:ObjectPlusPlus)={
+    this.usunCzesc(czescDoPrzekazania)
+    nowaCalosc.dodajCzesc(czescDoPrzekazania.getClass.getSimpleName+"_czesc",
+      nowaCalosc.getClass.getSimpleName+"_calosc",
+      czescDoPrzekazania)
+  }
 }
 
-class ObjectPlusPlus extends ObjectPlus with Serializable {
+class ObjectPlusPlus extends ObjectPlus() with Serializable {
   /** Przechowuje informacje o wszystkich powiazaniach tego obiektu */
-  private val powiazania = mutable.HashMap[String, mutable.HashMap[Any, ObjectPlusPlus]]()
 
-  def dodajPowiazanie(nazwaRoli: String,
-                      odwrotnaNazwaRoli: String,
-                      obiektDocelowy: ObjectPlusPlus,
-                      kwalifikator: Any,
-                      licznik: Integer) {
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = null
-    if (licznik < 1) return
-    if (powiazania.contains(nazwaRoli)) {
-      //pobierz te powiazania
-      powiazaniaObiektu = powiazania(nazwaRoli)
-    } else {
-      //brak powiazan dla tej roli=>utworz
-      powiazaniaObiektu = mutable.HashMap[Any, ObjectPlusPlus]()
-      powiazania.put(nazwaRoli, powiazaniaObiektu)
-    }
-    if (!powiazaniaObiektu.contains(kwalifikator)) {
-      //Dodaj powiazanie dla tego obiektu
-      powiazaniaObiektu.put(kwalifikator, obiektDocelowy)
-      //dodaj powiwzanie zwrotne
-      obiektDocelowy.dodajPowiazanie(odwrotnaNazwaRoli, nazwaRoli, this, this, licznik - 1)
-    }
-  }
+  import java.util
+  private var powiazania = new util.Hashtable[String, util.HashMap[Any, ObjectPlusPlus]]
 
-  def dodajPowiazanie(
+   def dodajPowiazanie(
                        nazwaRoli: String,
                        odwrotnaNazwaRoli: String,
                        obiektDocelowy: ObjectPlusPlus,
@@ -50,6 +43,7 @@ class ObjectPlusPlus extends ObjectPlus with Serializable {
       2)
   }
 
+
   def dodajPowiazanie(
                        nazwaRoli: String,
                        odwrotnaNazwaRoli: String,
@@ -59,6 +53,7 @@ class ObjectPlusPlus extends ObjectPlus with Serializable {
       odwrotnaNazwaRoli,
       obiektDocelowy,
       obiektDocelowy)
+    println("powiazania z metody========================= "+powiazania)
   }
 
   @throws(classOf[Exception])
@@ -67,51 +62,42 @@ class ObjectPlusPlus extends ObjectPlus with Serializable {
                   odwrotnaNazwaRoli: String,
                   obiektCzesc: ObjectPlusPlus): Unit = {
     //sprawdz czy ta czesc juz gdzies nie wystepuje
-    if (ObjectPlusPlus.wszystkieCzesci.contains(obiektCzesc)) throw new Exception("Ta czesc jest juz powiazana z jakąs caloscia")
-    dodajPowiazanie(nazwaRoli, odwrotnaNazwaRoli, obiektCzesc)
-    //Zapamietaj dodanie obiektu jako czesci
-    ObjectPlusPlus.wszystkieCzesci += (obiektCzesc)
+    if (ObjectPlusPlus.wszystkieCzesci.contains(obiektCzesc)) {
+      throw new Exception("Ta czesc jest juz powiazana z jakąs caloscia " + obiektCzesc.toString)
+    }else {
+      dodajPowiazanie(nazwaRoli, odwrotnaNazwaRoli, obiektCzesc)
+      //Zapamietaj dodanie obiektu jako czesci
+      ObjectPlusPlus.wszystkieCzesci.add(obiektCzesc)
+    }
   }
 
   @throws(classOf[Exception])
   def dajPowiazania(nazwaRoli: String): Array[ObjectPlusPlus] = {
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = mutable.HashMap().empty
-    if (!powiazania.contains(nazwaRoli)) {
+    var powiazaniaObiektu: util.HashMap[Any, ObjectPlusPlus] = new util.HashMap()
+    if (!powiazania.containsKey(nazwaRoli)) {
       //brak powiazan dla tej roli
       throw new Exception("Brak powiazan dla roli: " + nazwaRoli)
-    }
-    powiazaniaObiektu = powiazania(nazwaRoli)
-
-    powiazaniaObiektu.asJava.values.toArray(new Array[ObjectPlusPlus](0))    //- mas06 str 26
-  }
-
-  @throws(classOf[Exception])
-  def wyswietlpowiazania(nazwaRoli: String, stream: PrintStream): Unit = {
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = null
-    if (!powiazania.contains(nazwaRoli)) {
-      //brak powiazan dla tej roli
-      throw new Exception("Brak powiazan dla roli: " + nazwaRoli)
-    }
-    powiazaniaObiektu = powiazania(nazwaRoli)
-    val col: Iterable[ObjectPlusPlus] = powiazaniaObiektu.values
-    stream.println(this.getClass.getSimpleName + " powiazania w roli " + nazwaRoli + ": ")
-    stream.println(" " + col)
-
-  } //mas06-str26
+    }else{
+    powiazaniaObiektu = powiazania.get(nazwaRoli)
+    powiazaniaObiektu.values.toArray(new Array[ObjectPlusPlus](0)) //- mas06 str 26
+  }}
 
   @throws(classOf[Exception])
   def wyswietlPowiazania(
                           nazwaRoli: String,
                           stream: PrintStream): Unit = {
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = mutable.HashMap.empty
-    if (!powiazania.contains(nazwaRoli)) {
+    var powiazaniaObiektu: util.HashMap[Any, ObjectPlusPlus] = new util.HashMap
+    if (!powiazania.containsKey(nazwaRoli)) {
       //brak powiazan dla tej roli
       throw new Exception("Brak powiazan dla roli: " + nazwaRoli)
     }
-    powiazaniaObiektu = powiazania(nazwaRoli)
-    val col: Iterable[ObjectPlusPlus] = powiazaniaObiektu.values
+    powiazaniaObiektu = powiazania.get(nazwaRoli)
+    var col: util.Collection[ObjectPlusPlus] = powiazaniaObiektu.values
     stream.println(this.getClass.getSimpleName + " powiazania w roli " + nazwaRoli + ":")
-    stream.println(" " + col)
+    import scala.collection.JavaConversions._
+    for (obj <- col) {
+      stream.println(" " + obj)
+    }
   }
 
   @throws(classOf[Exception])
@@ -119,39 +105,44 @@ class ObjectPlusPlus extends ObjectPlus with Serializable {
                           nazwaRoli: String,
                           kwalifikator: Any): ObjectPlusPlus = {
 
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = null
+    var powiazaniaObiektu: util.HashMap[Any, ObjectPlusPlus] = null
     if (!powiazania.contains(nazwaRoli)) {
       //brak powiazan dla tej roli
       throw new Exception("Brak powiazan dla roli: " + nazwaRoli)
     }
-    powiazaniaObiektu = powiazania(nazwaRoli)
-    if (!powiazaniaObiektu.contains(kwalifikator)) {
+    powiazaniaObiektu = powiazania.get(nazwaRoli)
+    if (!powiazaniaObiektu.containsKey(kwalifikator)) {
       //brak powiazan dla tej roli
       throw new Exception("Brak powiazania dla kwalifikatora " + kwalifikator)
     }
     powiazaniaObiektu.get(kwalifikator).asInstanceOf[ObjectPlusPlus]
   }
-
-  /** Wywołanie super jest automatyczne. */
+  /**Metoda usuwajaca powiazania obiketu.
+    * Przyjmujaca referencje do obiektu ktorego powiazanie chcemy usunac*/
+  def usunPowiazanie(powiazanieDoUsuniecia:ObjectPlusPlus)={
+    require(powiazania.containsKey(powiazanieDoUsuniecia),throw new Exception("Ten obiekt nie jest powiazany"))
+    this.powiazania.remove(powiazanieDoUsuniecia)
+  }
   private def dodajPowiazanie(
                                nazwaRoli: String,
                                odwrotnaNazwaRoli: String,
                                obiektDocelowy: ObjectPlusPlus,
                                kwalifikator: Any,
                                licznik: Int): Unit = {
-    var powiazaniaObiektu: mutable.HashMap[Any, ObjectPlusPlus] = mutable.HashMap.empty
 
-    if (licznik < 1) return
-    if (powiazania.contains(nazwaRoli)) {
+    var powiazaniaObiektu: util.HashMap[Any,ObjectPlusPlus] = null
+
+    if (licznik < 1) {return}
+    if (powiazania.containsKey(nazwaRoli)) {
       //pobierz te powiazania
-      powiazaniaObiektu = powiazania(nazwaRoli)
+      powiazaniaObiektu = powiazania.get(nazwaRoli)
     } else {
       //brak powiazan dla takiej roli=>utworz
-      powiazaniaObiektu = mutable.HashMap()
+      powiazaniaObiektu = new util.HashMap[Any,ObjectPlusPlus]()
       powiazania.put(nazwaRoli, powiazaniaObiektu)
     }
 
-    if (powiazaniaObiektu.contains(kwalifikator)) {
+    if (!powiazaniaObiektu.containsKey(kwalifikator)) {
       //dodaj powiazanie dla tego obiektu
       powiazaniaObiektu.put(kwalifikator, obiektDocelowy)
       //dodaj powiazanie zwrotne

@@ -8,15 +8,13 @@ import scala.collection.mutable
 
 class DzialkaRolna_Zabieg(//asocjaja z Atrybutem
                           dataZabiegu: LocalDate,
-                          dzialkaRolna: DzialkaRolna,
-                          zabiegPielegnacyjny: ZabiegPielegnacyjny
+                          powierzchniaZabiegu:Double,
+                          dR:DzialkaRolna,
+                          zP:ZabiegPielegnacyjny
                          ) extends ObjectPlusPlus {
 
-  def getDataZabiegu = dataZabiegu
+  this.dodajPowiazanie(dR.getClass.getSimpleName,this.getClass.getSimpleName,dR)
+  this.dodajPowiazanie(zP.getClass.getSimpleName,this.getClass.getSimpleName,zP)
 
 
-  override def toString: String = {
-    "Dnia " + dataZabiegu + " wykonano zabieg " + zabiegPielegnacyjny + " " +
-      " na dzialkach " + dzialkaRolna
-  }
 }

@@ -1,21 +1,18 @@
 package model
 
 object Enumy extends Enumeration {
-  //ATRYBUT KLASOWY Powtarzalny
-  //przyklad ENUM
 
-  type SzkodnikiIPatogeny = Value
-  type SystematykaUpraw = Value
+  //przyklad ENUM
+  type SystematykaBiologiczna = Value
+  val jednoliscienne=Value("jednosliscienne");
+  val dwuliscienne= Value("dwuliścienne");
+  val wieloletnie=Value("wieloletnie");
+  val owady,grzyby=Value
+
+  type powodZabiegu=Value
+  val poprawaWarunkowWzrostu,zwalczenieSzkodnikow=Value
+
   type ZabiegiNaRosliny = Value
-  val
-  grzyby,
-  owady,
-  chwasty,
-  chwastyJednoliscienne,
-  chwastyDwuliscienne = Value
-  val
-  JEDNOLISCIENNE = Value
-  val DWULISCIENNE = Value
   val
   nawozenieAzotem,
   nawozenieNPK,
