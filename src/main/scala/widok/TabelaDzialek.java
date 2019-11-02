@@ -310,7 +310,7 @@ public class TabelaDzialek {
         return key;
     }
 
-    /*Tutaj zdefiniowane są działki rolne wyswietlane w oknie tabeli*/
+    /*Tutaj zdefiniowane są działki rolne do testowania wyswietlania w oknie tabeli*/
     public ObservableList<KlasaZbierajacaDoTabeliDzialek> pobierzDzialki() {
         dzialki = FXCollections.observableArrayList();
         dzialki.add(new KlasaZbierajacaDoTabeliDzialek("Pszenica Ozima", "A", 2.3, Arrays.asList("1/1", "12A")));
