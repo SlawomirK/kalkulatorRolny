@@ -20,7 +20,7 @@ public class Main extends Application {
         launch(args);
     }
 
-    //https://github.com/buckyroberts/Source-Code-from-Tutorials/blob/master/JavaFX/024_menus/Main.java
+   
     @Override
     public void start(Stage primaryStage) {
         window = primaryStage;
